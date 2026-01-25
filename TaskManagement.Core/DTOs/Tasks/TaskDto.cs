@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TaskManagement.Core.Enums;
-using TaskStatus = TaskManagement.Core.Enums.TaskStatus;
+using TaskState = TaskManagement.Core.Enums.TaskState;
 
 namespace TaskManagement.Core.DTOs.Tasks
 {
@@ -13,7 +13,7 @@ namespace TaskManagement.Core.DTOs.Tasks
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public TaskStatus Status { get; set; }
+        public TaskState Status { get; set; }
         public TaskPriority Priority { get; set; }
         public DateTime? DueDate { get; set; }
         public int? AssignedToUserId { get; set; }

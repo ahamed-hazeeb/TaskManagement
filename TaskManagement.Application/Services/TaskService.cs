@@ -10,7 +10,7 @@ using TaskManagement.Core.Enums;
 using TaskManagement.Core.Exceptions;
 using TaskManagement.Core.Interfaces;
 using TaskManagement.Infrastructure.Data;
-using TaskStatus = TaskManagement.Core.Enums.TaskStatus;
+using TaskState = TaskManagement.Core.Enums.TaskState;
 
 namespace TaskManagement.Application.Services
 {
@@ -57,7 +57,7 @@ namespace TaskManagement.Application.Services
             {
                 Title = request.Title,
                 Description = request.Description,
-                Status = TaskStatus.Todo,
+                Status = TaskState.Todo,
                 Priority = request.Priority,
                 DueDate = request.DueDate,
                 AssignedToUserId = request.AssignedToUserId,
@@ -261,7 +261,7 @@ namespace TaskManagement.Application.Services
             return await GetTaskByIdAsync(taskId, currentUserId);
         }
 
-        public async Task<TaskDto> UpdateTaskStatusAsync(int taskId, TaskStatus newStatus, int currentUserId)
+        public async Task<TaskDto> UpdateTaskStatusAsync(int taskId, TaskState newStatus, int currentUserId)
         {
             // Get task
             var task = await _context.Tasks
@@ -283,12 +283,12 @@ namespace TaskManagement.Application.Services
             task.Status = newStatus;
 
             // If marking as Done, set CompletedAt
-            if (newStatus == TaskStatus.Done && task.CompletedAt == null)
+            if (newStatus == TaskState.Done && task.CompletedAt == null)
             {
                 task.CompletedAt = DateTime.UtcNow;
             }
             // If moving back from Done, clear CompletedAt
-            else if (newStatus != TaskStatus.Done && task.CompletedAt != null)
+            else if (newStatus != TaskState.Done && task.CompletedAt != null)
             {
                 task.CompletedAt = null;
             }
