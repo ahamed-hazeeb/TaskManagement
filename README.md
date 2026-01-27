@@ -53,8 +53,8 @@ TaskManagement/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/task-management-api.git
-cd task-management-api
+git clone https://github.com/ahamed-hazeeb/TaskManagement.git
+cd TaskManagement
 ```
 
 ### 2. Update connection string
@@ -81,7 +81,7 @@ dotnet run
 
 ### 5. Open Swagger UI
 
-Navigate to: `https://localhost:7xxx/swagger`
+Navigate to: `https://localhost:7032/swagger`
 
 ## 📚 API Endpoints
 
@@ -251,14 +251,14 @@ Tasks
 
 ### Using Swagger UI
 
-1. Navigate to `https://localhost:7xxx/swagger`
+1. Navigate to `https://localhost:7032/swagger`
 2. Click "Authorize" and enter token
 3. Try endpoints interactively
 
 ### Using cURL
 ```bash
 # Register
-curl -X POST "https://localhost:7xxx/api/v1/auth/register" \
+curl -X POST "https://localhost:7032/api/v1/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -268,7 +268,7 @@ curl -X POST "https://localhost:7xxx/api/v1/auth/register" \
   }'
 
 # Login
-curl -X POST "https://localhost:7xxx/api/v1/auth/login" \
+curl -X POST "https://localhost:7032/api/v1/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -276,7 +276,7 @@ curl -X POST "https://localhost:7xxx/api/v1/auth/login" \
   }'
 
 # Get teams (with auth)
-curl -X GET "https://localhost:7xxx/api/v1/teams/my-teams" \
+curl -X GET "https://localhost:7032/api/v1/teams/my-teams" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -315,8 +315,8 @@ This project is licensed under the MIT License.
 ## 👤 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [yourprofile](https://linkedin.com/in/yourprofile)
+- GitHub: [@yourusername](https://github.com/ahamed-hazeeb)
+- LinkedIn: [yourprofile](www.linkedin.com/in/ahamed-hazeeb-902782146)
 - Email: your-email@example.com
 
 ## 🙏 Acknowledgments
