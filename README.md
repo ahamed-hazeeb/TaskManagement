@@ -314,7 +314,7 @@ This project is licensed under the MIT License.
 
 ## 👤 Author
 
-**Your Name**
+**Ahamed Hazeeb**
 - GitHub: [@ahamed-hazeeb](https://github.com/ahamed-hazeeb)
 - LinkedIn: [ahamed-hazeeb](www.linkedin.com/in/ahamed-hazeeb-902782146)
 
