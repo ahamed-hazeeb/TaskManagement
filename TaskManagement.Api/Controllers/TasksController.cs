@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TaskManagement.Core.DTOs.Common;
 using TaskManagement.Core.DTOs.Tasks;
 using TaskManagement.Core.Entities;
 using TaskManagement.Core.Exceptions;
@@ -57,24 +58,9 @@ namespace TaskManagement.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskDto>> GetTaskById(int projectId, int id)
         {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var task = await _taskService.GetTaskByIdAsync(id, userId);
-                return Ok(task);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (UnauthorizedException ex)
-            {
-                return StatusCode(403, new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred", details = ex.Message });
-            }
+            var userId = GetCurrentUserId();
+            var task = await _taskService.GetTaskByIdAsync(id, userId);
+            return Ok(task);
         }
 
         /// <summary>
@@ -210,7 +196,33 @@ namespace TaskManagement.Api.Controllers
                 return StatusCode(500, new { message = "An error occurred", details = ex.Message });
             }
         }
-
+        /// <summary>
+        /// Get all tasks in project with filtering, sorting, and pagination
+        /// </summary>
+        [HttpGet("paged")]
+        public async Task<ActionResult<PagedResult<TaskDto>>> GetProjectTasksPaged(
+            int projectId,
+            [FromQuery] TaskQueryParams queryParams)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var result = await _taskService.GetProjectTasksPagedAsync(projectId, queryParams, userId);
+                return Ok(result);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", details = ex.Message });
+            }
+        }
         /// <summary>
         /// Update task status
         /// </summary>

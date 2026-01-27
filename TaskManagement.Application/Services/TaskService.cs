@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using TaskManagement.Core.DTOs.Common;
 using TaskManagement.Core.DTOs.Tasks;
 using TaskManagement.Core.Entities;
 using TaskManagement.Core.Enums;
@@ -148,7 +149,118 @@ namespace TaskManagement.Application.Services
                 CompletedAt = t.CompletedAt
             }).ToList();
         }
+        public async Task<PagedResult<TaskDto>> GetProjectTasksPagedAsync(int projectId, TaskQueryParams queryParams, int currentUserId)
+        {
+            // Get project and verify access
+            var project = await _context.Projects
+                .Include(p => p.Team)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
 
+            if (project == null)
+                throw new NotFoundException("Project", projectId);
+
+            // Verify user is member of team
+            var isMember = await _unitOfWork.TeamMembers
+                .ExistsAsync(tm => tm.TeamId == project.TeamId && tm.UserId == currentUserId);
+
+            if (!isMember)
+                throw new UnauthorizedException("You must be a team member to view tasks");
+
+            // Start building query
+            var query = _context.Tasks
+                .Include(t => t.AssignedTo)
+                .Include(t => t.Project)
+                .Where(t => t.ProjectId == projectId)
+                .AsQueryable();
+
+            // Apply filters
+            if (queryParams.Status.HasValue)
+            {
+                query = query.Where(t => t.Status == queryParams.Status.Value);
+            }
+
+            if (queryParams.Priority.HasValue)
+            {
+                query = query.Where(t => t.Priority == queryParams.Priority.Value);
+            }
+
+            if (queryParams.AssignedToUserId.HasValue)
+            {
+                query = query.Where(t => t.AssignedToUserId == queryParams.AssignedToUserId.Value);
+            }
+
+            if (queryParams.DueDateFrom.HasValue)
+            {
+                query = query.Where(t => t.DueDate >= queryParams.DueDateFrom.Value);
+            }
+
+            if (queryParams.DueDateTo.HasValue)
+            {
+                query = query.Where(t => t.DueDate <= queryParams.DueDateTo.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
+            {
+                var searchTerm = queryParams.SearchTerm.ToLower();
+                query = query.Where(t =>
+                    t.Title.ToLower().Contains(searchTerm) ||
+                    (t.Description != null && t.Description.ToLower().Contains(searchTerm)));
+            }
+
+            // Apply sorting
+            query = queryParams.SortBy?.ToLower() switch
+            {
+                "priority" => queryParams.SortDescending
+                    ? query.OrderByDescending(t => t.Priority)
+                    : query.OrderBy(t => t.Priority),
+
+                "duedate" => queryParams.SortDescending
+                    ? query.OrderByDescending(t => t.DueDate)
+                    : query.OrderBy(t => t.DueDate),
+
+                "createdat" => queryParams.SortDescending
+                    ? query.OrderByDescending(t => t.CreatedAt)
+                    : query.OrderBy(t => t.CreatedAt),
+
+                _ => query.OrderBy(t => t.CreatedAt)  // Default sort
+            };
+
+            // Get total count BEFORE pagination
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination
+            var tasks = await query
+                .Skip(queryParams.Skip)
+                .Take(queryParams.PageSize)
+                .ToListAsync();
+
+            // Map to DTOs
+            var taskDtos = tasks.Select(t => new TaskDto
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Description = t.Description,
+                Status = t.Status,
+                Priority = t.Priority,
+                DueDate = t.DueDate,
+                AssignedToUserId = t.AssignedToUserId,
+                AssignedToUserName = t.AssignedTo?.FullName,
+                ProjectId = t.ProjectId,
+                ProjectName = t.Project.Name,
+                CreatedAt = t.CreatedAt,
+                CompletedAt = t.CompletedAt
+            }).ToList();
+
+            // Return paged result
+            return new PagedResult<TaskDto>
+            {
+                Items = taskDtos,
+                Page = queryParams.Page,
+                PageSize = queryParams.PageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)queryParams.PageSize)
+            };
+        }
         public async Task<TaskDto> UpdateTaskAsync(int taskId, UpdateTaskRequest request, int currentUserId)
         {
             // Get task
