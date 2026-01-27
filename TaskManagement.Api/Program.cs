@@ -12,12 +12,28 @@ using TaskManagement.Application.Validators;
 using TaskManagement.Core.Interfaces;
 using TaskManagement.Infrastructure.Data;
 using TaskManagement.Infrastructure.Repositories;
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+
+
+
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:4200") // Frontend URLs
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
 // DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -60,8 +76,17 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+builder.Services.AddResponseCaching();
 
 builder.Services.AddControllers();
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+}).AddMvc();
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger with JWT support
@@ -71,13 +96,58 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Task Management API",
         Version = "v1",
-        Description = "A Task Management System with Team Collaboration"
+        Description = @"
+# Task Management System API
+
+A comprehensive REST API for team collaboration and task management.
+
+## Features
+- **Authentication**: JWT-based authentication with role-based access control
+- **Teams**: Create and manage teams with Owner/Manager/Member roles
+- **Projects**: Organize work into projects within teams
+- **Tasks**: Create, assign, and track tasks with status workflows
+- **Advanced Filtering**: Filter tasks by status, priority, assignee, and date range
+- **Pagination**: Efficient data loading with metadata
+
+## Authentication
+All endpoints (except `/api/v1/auth/register` and `/api/v1/auth/login`) require authentication.
+
+1. Register or login to get a JWT token
+2. Click 'Authorize' button above
+3. Enter: `Bearer YOUR_TOKEN_HERE`
+4. Click 'Authorize' then 'Close'
+
+## Common Workflows
+
+### 1. Getting Started
+```
+POST /api/v1/auth/register → Get token
+POST /api/v1/teams → Create team (you become Owner)
+POST /api/v1/teams/{teamId}/members → Add members
+POST /api/v1/teams/{teamId}/projects → Create project
+POST /api/v1/projects/{projectId}/tasks → Create tasks
+```
+
+### 2. Managing Tasks
+```
+GET /api/v1/projects/{projectId}/tasks/paged → List with filters
+PUT /api/v1/projects/{projectId}/tasks/{id}/status → Update status
+POST /api/v1/projects/{projectId}/tasks/{id}/assign → Assign to user
+```
+
+## Support
+For issues or questions, contact: your-email@example.com
+",
+        Contact = new OpenApiContact
+        {
+            Name = "Your Name",
+            Email = "your-email@example.com"
+        }
     });
 
-    // Add JWT Authentication to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below. Example: 'Bearer 12345abcdef'",
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -98,7 +168,22 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    // ✅ Enable XML comments (optional but recommended)
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
 });
+
+builder.Services.AddHealthChecks()
+    .AddCheck("database", () =>
+    {
+        return HealthCheckResult.Healthy("Database is reachable");
+    });
+
 
 var app = builder.Build();
 
@@ -112,11 +197,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
+
+app.UseResponseCaching();
 
 // IMPORTANT: Authentication must come before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();

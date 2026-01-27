@@ -42,6 +42,9 @@ namespace TaskManagement.Infrastructure.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Description).HasMaxLength(500);
+
+                entity.HasIndex(e => e.Name);
+
             });
 
             // TeamMember configuration
@@ -63,6 +66,9 @@ namespace TaskManagement.Infrastructure.Data
 
                 // Unique constraint: user can't join same team twice
                 entity.HasIndex(tm => new { tm.TeamId, tm.UserId }).IsUnique();
+
+                entity.HasIndex(tm => tm.UserId);
+                entity.HasIndex(tm => tm.TeamId);
             });
 
             // Project configuration
@@ -76,6 +82,10 @@ namespace TaskManagement.Infrastructure.Data
                     .WithMany(t => t.Projects)
                     .HasForeignKey(p => p.TeamId)
                     .OnDelete(DeleteBehavior.Cascade); // Delete team → delete projects
+
+                entity.HasIndex(p => p.TeamId);
+                entity.HasIndex(p => p.Name);
+                entity.HasIndex(p => p.Deadline);
             });
 
             // ProjectTask configuration
@@ -94,6 +104,12 @@ namespace TaskManagement.Infrastructure.Data
                     .WithMany(u => u.AssignedTasks)
                     .HasForeignKey(t => t.AssignedToUserId)
                     .OnDelete(DeleteBehavior.SetNull); // Delete user → unassign tasks (not delete)
+
+                entity.HasIndex(t => new { t.ProjectId, t.Status });
+                entity.HasIndex(t => new { t.ProjectId, t.Priority });
+                entity.HasIndex(t => new { t.ProjectId, t.AssignedToUserId });
+                entity.HasIndex(t => t.DueDate);
+                entity.HasIndex(t => t.CreatedAt);
             });
         }
     }

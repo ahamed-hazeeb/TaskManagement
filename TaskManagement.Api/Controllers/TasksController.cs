@@ -253,7 +253,6 @@ namespace TaskManagement.Api.Controllers
 
         private int GetCurrentUserId()
         {
-            // ✅ ALSO UPDATE THIS (from earlier fix)
             var userIdClaim = User.FindFirst("sub")?.Value;
 
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))

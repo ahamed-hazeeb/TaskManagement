@@ -47,6 +47,7 @@ namespace TaskManagement.Api.Controllers
         /// Get team by ID (must be a member)
         /// </summary>
         [HttpGet("{id}")]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<TeamDetailDto>> GetTeamById(int id)
         {
             try
