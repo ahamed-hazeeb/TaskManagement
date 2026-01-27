@@ -315,9 +315,8 @@ This project is licensed under the MIT License.
 ## 👤 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/ahamed-hazeeb)
-- LinkedIn: [yourprofile](www.linkedin.com/in/ahamed-hazeeb-902782146)
-- Email: your-email@example.com
+- GitHub: [@ahamed-hazeeb](https://github.com/ahamed-hazeeb)
+- LinkedIn: [ahamed-hazeeb](www.linkedin.com/in/ahamed-hazeeb-902782146)
 
 ## 🙏 Acknowledgments
 
