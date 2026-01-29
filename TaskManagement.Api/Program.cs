@@ -210,3 +210,6 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+// Make Program accessible to tests
+public partial class Program { }
