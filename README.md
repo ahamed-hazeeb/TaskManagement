@@ -249,6 +249,80 @@ Tasks
 
 ## 🧪 Testing
 
+The project includes comprehensive unit and integration tests to ensure code quality and reliability.
+
+### Test Structure
+
+```
+TaskManagement.Tests.Unit/           # Unit tests for services and business logic
+├── Services/
+│   ├── AuthServiceTests.cs         # Authentication service tests
+│   └── JwtServiceTests.cs          # JWT token generation/validation tests
+TaskManagement.Tests.Integration/   # Integration tests for API endpoints
+└── Controllers/
+    └── AuthControllerTests.cs      # Auth controller integration tests
+```
+
+### Running Tests
+
+**Run all tests:**
+```bash
+dotnet test
+```
+
+**Run only unit tests:**
+```bash
+dotnet test TaskManagement.Tests.Unit/TaskManagement.Tests.Unit.csproj
+```
+
+**Run only integration tests:**
+```bash
+dotnet test TaskManagement.Tests.Integration/TaskManagement.Tests.Integration.csproj
+```
+
+**Run with detailed output:**
+```bash
+dotnet test --verbosity detailed
+```
+
+### Test Coverage
+
+**Unit Tests (14 tests - All Passing ✅)**
+- AuthService: Registration, login, password verification, user retrieval
+- JwtService: Token generation, validation, expiration handling
+
+**Integration Tests (7 tests - In Progress)**
+- Auth endpoints: Register, login, user info retrieval
+- Note: Some integration tests are still being refined for FluentValidation compatibility
+
+### Writing New Tests
+
+The project uses:
+- **xUnit** as the test framework
+- **Moq** for mocking dependencies
+- **FluentAssertions** for readable assertions
+- **Microsoft.AspNetCore.Mvc.Testing** for integration tests
+- **EF Core InMemory** database for testing
+
+Example unit test:
+```csharp
+[Fact]
+public async Task RegisterAsync_WithValidRequest_ShouldCreateUser()
+{
+    // Arrange
+    var request = new RegisterRequest { /* ... */ };
+    
+    // Act
+    var result = await _authService.RegisterAsync(request);
+    
+    // Assert
+    result.Should().NotBeNull();
+    result.Email.Should().Be(request.Email);
+}
+```
+
+### Manual Testing
+
 ### Using Swagger UI
 
 1. Navigate to `https://localhost:7032/swagger`

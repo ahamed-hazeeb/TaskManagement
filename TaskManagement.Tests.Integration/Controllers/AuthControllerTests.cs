@@ -26,15 +26,16 @@ namespace TaskManagement.Tests.Integration.Controllers
             {
                 Email = $"test{Guid.NewGuid()}@example.com",
                 FullName = "Test User",
-                Password = "Password123",
-                ConfirmPassword = "Password123"
+                Password = "Password123!",
+                ConfirmPassword = "Password123!"
             };
 
             // Act
             var response = await _client.PostAsJsonAsync("/api/v1/auth/register", request);
+            var content = await response.Content.ReadAsStringAsync();
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.OK, $"because registration should succeed. Response: {content}");
             
             var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
             authResponse.Should().NotBeNull();
@@ -51,8 +52,8 @@ namespace TaskManagement.Tests.Integration.Controllers
             {
                 Email = "invalid-email",
                 FullName = "Test User",
-                Password = "Password123",
-                ConfirmPassword = "Password123"
+                Password = "Password123!",
+                ConfirmPassword = "Password123!"
             };
 
             // Act
@@ -70,8 +71,8 @@ namespace TaskManagement.Tests.Integration.Controllers
             {
                 Email = $"test{Guid.NewGuid()}@example.com",
                 FullName = "Test User",
-                Password = "Password123",
-                ConfirmPassword = "DifferentPassword"
+                Password = "Password123!",
+                ConfirmPassword = "DifferentPassword!"
             };
 
             // Act
@@ -89,8 +90,8 @@ namespace TaskManagement.Tests.Integration.Controllers
             {
                 Email = $"login{Guid.NewGuid()}@example.com",
                 FullName = "Login Test User",
-                Password = "Password123",
-                ConfirmPassword = "Password123"
+                Password = "Password123!",
+                ConfirmPassword = "Password123!"
             };
 
             await _client.PostAsJsonAsync("/api/v1/auth/register", registerRequest);
@@ -98,14 +99,15 @@ namespace TaskManagement.Tests.Integration.Controllers
             var loginRequest = new LoginRequest
             {
                 Email = registerRequest.Email,
-                Password = "Password123"
+                Password = "Password123!"
             };
 
             // Act
             var response = await _client.PostAsJsonAsync("/api/v1/auth/login", loginRequest);
+            var content = await response.Content.ReadAsStringAsync();
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.OK, $"because login should succeed. Response: {content}");
             
             var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
             authResponse.Should().NotBeNull();
@@ -138,21 +140,23 @@ namespace TaskManagement.Tests.Integration.Controllers
             {
                 Email = $"getme{Guid.NewGuid()}@example.com",
                 FullName = "GetMe Test User",
-                Password = "Password123",
-                ConfirmPassword = "Password123"
+                Password = "Password123!",
+                ConfirmPassword = "Password123!"
             };
 
             var registerResponse = await _client.PostAsJsonAsync("/api/v1/auth/register", registerRequest);
             var authResponse = await registerResponse.Content.ReadFromJsonAsync<AuthResponse>();
 
-            // Add authorization header
-            _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {authResponse!.Token}");
+            // Create a new client with the token
+            var clientWithToken = _factory.CreateClient();
+            clientWithToken.DefaultRequestHeaders.Add("Authorization", $"Bearer {authResponse!.Token}");
 
             // Act
-            var response = await _client.GetAsync("/api/v1/auth/me");
+            var response = await clientWithToken.GetAsync("/api/v1/auth/me");
+            var content = await response.Content.ReadAsStringAsync();
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.OK, $"because getting user info should succeed. Response: {content}");
             
             var userDto = await response.Content.ReadFromJsonAsync<UserDto>();
             userDto.Should().NotBeNull();
