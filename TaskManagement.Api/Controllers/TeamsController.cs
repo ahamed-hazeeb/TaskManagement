@@ -44,6 +44,16 @@ namespace TaskManagement.Api.Controllers
         }
 
         /// <summary>
+        /// Get all teams current user is member of (legacy endpoint)
+        /// </summary>
+        [HttpGet("my-teams")]
+        public async Task<ActionResult<List<TeamDto>>> GetMyTeams()
+        {
+            // Redirect to the main GetTeams endpoint
+            return await GetTeams();
+        }
+
+        /// <summary>
         /// Get team by ID (must be a member)
         /// </summary>
         [HttpGet("{id}")]
@@ -75,24 +85,6 @@ namespace TaskManagement.Api.Controllers
         /// </summary>
         [HttpGet]
         public async Task<ActionResult<List<TeamDto>>> GetTeams()
-        {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var teams = await _teamService.GetUserTeamsAsync(userId);
-                return Ok(teams);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred", details = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Get all teams current user is member of (legacy endpoint)
-        /// </summary>
-        [HttpGet("my-teams")]
-        public async Task<ActionResult<List<TeamDto>>> GetMyTeams()
         {
             try
             {
