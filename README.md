@@ -98,8 +98,9 @@ Navigate to: `https://localhost:7032/swagger`
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
 | POST | `/api/v1/teams` | Create team | ✅ |
+| GET | `/api/v1/teams` | Get user's teams | ✅ |
 | GET | `/api/v1/teams/{id}` | Get team details | ✅ |
-| GET | `/api/v1/teams/my-teams` | Get user's teams | ✅ |
+| GET | `/api/v1/teams/my-teams` | Get user's teams (legacy) | ✅ |
 | PUT | `/api/v1/teams/{id}` | Update team | ✅ Owner/Manager |
 | DELETE | `/api/v1/teams/{id}` | Delete team | ✅ Owner only |
 | POST | `/api/v1/teams/{id}/members` | Add member | ✅ Owner/Manager |
@@ -276,7 +277,7 @@ curl -X POST "https://localhost:7032/api/v1/auth/login" \
   }'
 
 # Get teams (with auth)
-curl -X GET "https://localhost:7032/api/v1/teams/my-teams" \
+curl -X GET "https://localhost:7032/api/v1/teams" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
