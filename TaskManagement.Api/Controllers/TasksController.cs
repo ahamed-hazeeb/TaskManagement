@@ -12,7 +12,7 @@ namespace TaskManagement.Api.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/projects/{projectId}/tasks")]
+    [Route("api/v{version:apiVersion}/projects/{projectId}/tasks")]
     public class TasksController : ControllerBase
     {
         private readonly ITaskService _taskService;

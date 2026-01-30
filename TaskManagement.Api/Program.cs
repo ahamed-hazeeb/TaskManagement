@@ -26,14 +26,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:4200") // Frontend URLs
-              .AllowAnyMethod()
+        policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
-              .AllowCredentials();
+              .AllowAnyMethod();
     });
 });
+
 // DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -187,6 +187,7 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+app.UseCors("AllowAngular");
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 

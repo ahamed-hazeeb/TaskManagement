@@ -11,7 +11,7 @@ namespace TaskManagement.Api.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class TeamsController : ControllerBase
     {
         private readonly ITeamService _teamService;

@@ -10,7 +10,7 @@ namespace TaskManagement.Api.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/teams/{teamId}/projects")]
+    [Route("api/v{version:apiVersion}/teams/{teamId}/projects")]
     public class ProjectsController : ControllerBase
     {
         private readonly IProjectService _projectService;
